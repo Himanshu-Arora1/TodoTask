@@ -1,0 +1,19 @@
+.example-container {
+    position: absolute;
+    text-align: center;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #eee;
+  }
+
+  .title-style{
+    font-family: cursive;
+    color: rgba(175, 47, 47, 0.12);
+    text-rendering: optimizeLegibility;
+    font-size: 78px;
+    margin-top: 38px;
+    position: relative;
+  }
+  

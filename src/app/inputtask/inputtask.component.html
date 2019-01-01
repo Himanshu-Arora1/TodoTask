@@ -1,0 +1,36 @@
+<mat-grid-list cols="12" rowHeight="50px">
+  <mat-grid-tile [colspan]="12" [rowspan]="1">
+    <h1 class="title-style"> todos </h1>
+  </mat-grid-tile>
+
+  <mat-grid-tile [colspan]="12" [rowspan]="11">
+    <form [formGroup]="taskForm" class="task-container">
+      <mat-form-field class="example-full-width">
+        <input 
+          matInput 
+          #addtodoinput
+          placeholder="Enter the task" 
+          formControlName="taskName">        
+      </mat-form-field>
+      <div class="task-list" formArrayName="allTodos">
+       
+        <div class="task-item" type="none"  *ngFor="let todo of allTodos.controls; let i = index">
+          <mat-card *ngIf="todo.value.status==showState || 'ALL'==showState">
+              <mat-checkbox    
+                    (click) = "onCheck(todo.value.id)"
+                    >
+                      {{todo.value.status}}
+                      {{todo.value.value}}
+              </mat-checkbox>
+              <button type="button" (click)=" onDelete(i)">minus</button>
+          </mat-card>
+        </div>
+      </div>
+    <div style="margin-top: 10px">
+      <button (click)='setShowFilter("ALL")'>All</button>
+      <button (click)='setShowFilter("ACTIVE")'>Active</button>
+      <button (click)='setShowFilter("COMPLETED")'>completed</button>
+  </div>
+  </form>
+  </mat-grid-tile>
+</mat-grid-list>

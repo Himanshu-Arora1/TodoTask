@@ -1,0 +1,17 @@
+.task-container {
+    /* max-width: 500px;
+    max-height: 150px;
+    width: 100%;
+    height: 100%; */
+
+    width: 50%
+}
+
+/* 
+.task-container > mat-form-field {
+    width: 100%;
+  }
+
+  .task-container > mat-checkbox {
+    width: 100%;
+  } */
