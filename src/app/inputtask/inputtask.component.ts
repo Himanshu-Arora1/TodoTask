@@ -88,7 +88,7 @@ export class InputtaskComponent implements OnInit {
       if (self.todoItems === undefined) {
         self.todoItems = [{ id: uuid(), value: taskValue, status: 'ACTIVE' }]
       } else {
-        self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
+        // self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
       }
       this.addAllTodos(this.i);
       console.log('this.i',this.i);
@@ -99,11 +99,27 @@ export class InputtaskComponent implements OnInit {
 
    writeUserData() {
     console.log('write');
-    firebase.database().ref('todos/all').set({
+    const value = [{
       id: 'abcnew',
       value: 'Arora',
       status : 'Completed'
-    })
+    },{
+      id: '12312312',
+      value: '12312312',
+      status : 'Completed'
+    },{
+      id: '2343wefwe',
+      value: '234234',
+      status : 'Completed'
+    }];
+    const completeHandler = (a: Error) => {
+      if (a != null && a != undefined) {
+        console.log('Failed to add new item', a);
+      } else {
+        console.log('Successfully added new item');
+      }
+    }
+    firebase.database().ref('todos/all').set(value, completeHandler);
   }
 
   addAllTodos(i: number) {
