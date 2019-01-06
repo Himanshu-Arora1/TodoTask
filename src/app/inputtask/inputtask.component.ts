@@ -22,7 +22,6 @@ import { ThrowStmt } from '@angular/compiler';
   styleUrls: ['./inputtask.component.css']
 })
 
-
 export class InputtaskComponent implements OnInit {
   inputValue = '';
   filter = "all";
@@ -31,6 +30,7 @@ export class InputtaskComponent implements OnInit {
   showState: 'ALL'|'ACTIVE'|'COMPLETED' = 'ALL';
 
   taskForm: FormGroup;
+
   todoItems: [{
     id: number,
     value: string,
@@ -46,6 +46,7 @@ export class InputtaskComponent implements OnInit {
     storageBucket: "todo-cdb7a.appspot.com",
   };
 
+
   ngOnInit() {
     firebase.initializeApp(this.config);
     
@@ -53,9 +54,8 @@ export class InputtaskComponent implements OnInit {
 
     var starCountRef = this.database.ref('todos/all');
     starCountRef.on('value', function (snapshot) {
-      console.log('got new values from server')
+      console.log('got new values from server') ;
       this.todoItems = snapshot.val() || [];
-      this.addAllTodos(this.i);
     }.bind(this));
     
     this.taskForm = this.fb.group({
@@ -68,18 +68,16 @@ export class InputtaskComponent implements OnInit {
     }); 
 
     this.allTodos.removeAt(0);
-    console.log(this.allTodos); 
+    console.log('allTodossss',this.allTodos); 
 
     this.writeUserData();
   }
 
- 
   ngAfterViewInit() {
     // this.addTodoInput.nativeElement. = "Anchovies! 🍕🍕";
 
     const self = this;
         
-    console.log('uuid', uuid());
     fromEvent(this.addTodoInput.nativeElement, 'keyup').pipe(
       filter(() => self.taskName.value !== null && self.taskName.value !== ""),
       filter((e: KeyboardEvent) => e.key == 'Enter'),
@@ -91,23 +89,13 @@ export class InputtaskComponent implements OnInit {
         self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
       }
       this.addAllTodos(this.i);
-      console.log('this.i',this.i);
       this.i++;
     });
     
   }
 
-   writeUserData() {
-    console.log('write');
-    firebase.database().ref('todos/all').set({
-      id: 'abcnew',
-      value: 'Arora',
-      status : 'Completed'
-    })
-  }
-
+  
   addAllTodos(i: number) {
-    console.log(this.taskName.value);
     // this.allTodos.push(this.fb.control(this.todoItems[i]));
 
     this.allTodos.push(this.fb.control(this.todoItems));
@@ -115,18 +103,30 @@ export class InputtaskComponent implements OnInit {
     this.taskName.reset();
   }
 
-  database: any;
+   writeUserData() {
+// firebase.database().ref('todos/all').set([{
+    //   id: 'abcnew',
+    //   value: 'Arora',
+    //   status : 'Completed'
+    // }])
+
+    this.taskForm.value.allTodos = this.allTodos;
+
+    console.log('ar', this.taskForm.value.allTodos);
+    firebase.database().ref('todos/all').set(this.taskForm.value.allTodos);
+  }
+
+   database: any;
 
   constructor(private fb: FormBuilder) {
   }
 
   onDelete(i: number){
-    console.log('deletion of',i);
+    
     this.allTodos.removeAt(i);
   }
 
   onCheck(id){
-      console.log('id',id);
 
      var filteredItems =  this.todoItems.filter((todoItem)=> {
           return  todoItem.id == id;
@@ -150,8 +150,7 @@ export class InputtaskComponent implements OnInit {
     return this.taskForm.get('taskName') as FormControl;
   }
 
-
-  setShowFilter(value) { 
+  setShowFilter(value: any) { 
     this.showState = value;
  }
 }
