@@ -1,12 +1,10 @@
 import * as firebase from 'firebase/app';
 import 'firebase/database';
 
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit, ElementRef } from '@angular/core';
 import { fromEvent, observable } from 'rxjs';
 import { Observable, Observer } from 'rxjs';
 import { filter, switchMap, map } from 'rxjs/operators';
-
-//import  uuid  from 'uuid/v1';
 
 import uuid from 'uuid/v1';
 
@@ -15,15 +13,16 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { MAT_CHECKBOX_CLICK_ACTION } from '@angular/material/checkbox';
 import { ThrowStmt } from '@angular/compiler';
 
-@Component({ //decorator
+ @Component({  // decorator
   selector: 'app-inputtask',
   templateUrl: './inputtask.component.html',
   styleUrls: ['./inputtask.component.css']
 })
 
-export class InputtaskComponent implements OnInit {
+export class InputtaskComponent implements OnInit, AfterViewInit {
+
   inputValue = '';
-  filter = "all";
+  filter = 'all';
   checked = false;
   i = 0;
 
@@ -35,73 +34,61 @@ export class InputtaskComponent implements OnInit {
     id: number,
     value: string,
     status: 'COMPLETED' | 'ACTIVE'
-  }]
+  } ];
 
+  database: any;
   @ViewChild('addtodoinput') addTodoInput: ElementRef;
-  
   config = {
-    apiKey: "AIzaSyBvtO9p8F1xyA1OlXMav4APYjIozngrje4",
-    authDomain: "todo-cdb7a.firebaseapp.com",
-    databaseURL: "https://todo-cdb7a.firebaseio.com",
-    storageBucket: "todo-cdb7a.appspot.com",
+    apiKey: 'AIzaSyBvtO9p8F1xyA1OlXMav4APYjIozngrje4',
+    authDomain: 'todo-cdb7a.firebaseapp.com',
+    databaseURL: 'https://todo-cdb7a.firebaseio.com',
+    storageBucket: 'todo-cdb7a.appspot.com',
   };
 
-
   ngOnInit() {
-    
+
+    console.log('oninti');
     firebase.initializeApp(this.config);
-    
      this.database = firebase.database();
 
-    var serverTask = this.database.ref('todos/all');
+    const serverTask = this.database.ref('todos/all');
 
     serverTask.on('value', function (snapshot) {
        this.todoItems = snapshot.val() || [];
-      console.log('abc', this.allTodos);
+      console.log('abc', this.todoItems);
 
-       if(this.allTodos.value.length == []){
+       if (this.allTodos.value.length === 0) {
+
           this.todoItems.forEach(item => {
-              this.allTodos.push(this.fb.control(item));
-       }) }else{
-            console.log('issus is with alltodos')
-       }
-      
-       
-       console.log('snap', this.allTodos.controls);
+            this.allTodos.push(this.fb.control(item));
+            // this.allTodos.push(this.fb.control(this.todoItems[i]));
+          }); }
+       console.log('snap', this.allTodos);
     }.bind(this));
-    
-    
+
     // Form control Declaration
     this.taskForm = this.fb.group({
       taskName: [''],
       test: [''],
-      
       allTodos: this.fb.array([{
         // this.fb.control('this.taskName.value')
       }])
-    }); 
-
-    // console.log('todoitems', this.todoItems);
-    // this.allTodos.push(this.fb.control(this.todoItems));
-    // console.log('all', this.allTodos);
-    
-      this.allTodos.removeAt(0);    
-    
+    });
+       this.allTodos.removeAt(0);
   }
 
   ngAfterViewInit() {
 
     const self = this;
-        
     fromEvent(this.addTodoInput.nativeElement, 'keyup').pipe(
-      filter(() => self.taskName.value !== null && self.taskName.value !== ""),
-      filter((e: KeyboardEvent) => e.key == 'Enter'),
+      filter(() => self.taskName.value !== null && self.taskName.value !== ''),
+      filter((e: KeyboardEvent) => e.key === 'Enter'),
       map(() => self.taskName.value)
     ).subscribe((taskValue: string) => {
       if (self.todoItems === undefined) {
-        self.todoItems = [{ id: uuid(), value: taskValue, status: 'ACTIVE' }]
+        self.todoItems = [{ id: uuid(), value: taskValue, status: 'ACTIVE' }];
       } else {
-        self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
+        self.todoItems.push({ id: uuid(), value: taskValue, status: 'ACTIVE' });
       }
       this.addAllTodos(this.i);
       this.i++;
@@ -110,9 +97,7 @@ export class InputtaskComponent implements OnInit {
 
   addAllTodos(i: number) {
     // this.allTodos.push(this.fb.control(this.todoItems[i]));
-    
     this.allTodos.push(this.fb.control(this.todoItems[i]));
-    
     this.taskName.reset();
 
     this.writeUserData();
@@ -121,46 +106,36 @@ export class InputtaskComponent implements OnInit {
   writeUserData() {
     console.log('all',  this.allTodos);
     const value = this.allTodos.value;
-    console.log('values',  this.allTodos.value)
     const completeHandler = (a: Error) => {
-      if (a != null && a != undefined) {
+      if (a != null && a !== undefined) {
         console.log('Failed to add new item', a);
       } else {
         console.log('Successfully added new item');
       }
-    }
+    };
     firebase.database().ref('todos/all').set(value, completeHandler);
   }
-
-   database: any;
 
   constructor(private fb: FormBuilder) {
   }
 
-  onDelete(i: number){
-    
+  onDelete(i: number) {
     this.allTodos.removeAt(i);
   }
 
-  onCheck(id){
-     var filteredItems =  this.todoItems.filter((todoItem)=> {
-          return  todoItem.id == id;
-      })
+  onCheck(id) {
+     const filteredItems =  this.todoItems.filter((todoItem) => {
+          return  todoItem.id === id;
+      });
 
-      filteredItems.forEach((filteredItem)=>{
+      filteredItems.forEach((filteredItem) => {
 
-        if(filteredItem.status=='ACTIVE'){
-          filteredItem.status='COMPLETED'
-        }else{
-          filteredItem.status='ACTIVE'
+        if (filteredItem.status === 'ACTIVE') {
+          filteredItem.status = 'COMPLETED';
+        } else {
+          filteredItem.status = 'ACTIVE';
         }
-
-        // if(filteredItem.status=='COMPLETED'){
-        //   filteredItem.status='ACTIVE';
-        // }else{
-        //   filteredItem.status='COMPLETED';
-        // }    
-      })
+      });
   }
 
   get allTodos() {
@@ -171,7 +146,7 @@ export class InputtaskComponent implements OnInit {
     return this.taskForm.get('taskName') as FormControl;
   }
 
-  setShowFilter(value: any) { 
+  setShowFilter(value: any) {
     this.showState = value;
- }
+  }
 }
