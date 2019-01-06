@@ -22,15 +22,16 @@ import { ThrowStmt } from '@angular/compiler';
   styleUrls: ['./inputtask.component.css']
 })
 
-
 export class InputtaskComponent implements OnInit {
   inputValue = '';
   filter = "all";
   checked = false;
   i = 0;
+
   showState: 'ALL'|'ACTIVE'|'COMPLETED' = 'ALL';
 
   taskForm: FormGroup;
+
   todoItems: [{
     id: number,
     value: string,
@@ -46,18 +47,21 @@ export class InputtaskComponent implements OnInit {
     storageBucket: "todo-cdb7a.appspot.com",
   };
 
+
   ngOnInit() {
+    
     firebase.initializeApp(this.config);
     
      this.database = firebase.database();
 
-    var starCountRef = this.database.ref('todos/all');
-    starCountRef.on('value', function (snapshot) {
-      console.log('got new values from server')
-      this.todoItems = snapshot.val() || [];
-      this.addAllTodos(this.i);
+    var serverTask = this.database.ref('todos/all');
+    serverTask.on('value', function (snapshot) {
+       this.todoItems = snapshot.val() || [];
+       //this.allTodos.push(this.fb.control(this.todoItems));
+       console.log('snap', this.allTodos);
     }.bind(this));
     
+    // Form control Declaration
     this.taskForm = this.fb.group({
       taskName: [''],
       test: [''],
@@ -67,19 +71,20 @@ export class InputtaskComponent implements OnInit {
       }])
     }); 
 
-    this.allTodos.removeAt(0);
-    console.log(this.allTodos); 
-
-    this.writeUserData();
+    // console.log('todoitems', this.todoItems);
+    // this.allTodos.push(this.fb.control(this.todoItems));
+    // console.log('all', this.allTodos);
+    
+      this.allTodos.removeAt(0);    
+    
   }
 
- 
   ngAfterViewInit() {
-    // this.addTodoInput.nativeElement. = "Anchovies! 🍕🍕";
-
+    
+    
+    
     const self = this;
         
-    console.log('uuid', uuid());
     fromEvent(this.addTodoInput.nativeElement, 'keyup').pipe(
       filter(() => self.taskName.value !== null && self.taskName.value !== ""),
       filter((e: KeyboardEvent) => e.key == 'Enter'),
@@ -88,30 +93,27 @@ export class InputtaskComponent implements OnInit {
       if (self.todoItems === undefined) {
         self.todoItems = [{ id: uuid(), value: taskValue, status: 'ACTIVE' }]
       } else {
-        // self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
+        self.todoItems.push({ id:uuid(), value: taskValue, status: 'ACTIVE' });
       }
       this.addAllTodos(this.i);
-      console.log('this.i',this.i);
       this.i++;
     });
-    
   }
 
-   writeUserData() {
-    console.log('write');
-    const value = [{
-      id: 'abcnew',
-      value: 'Arora',
-      status : 'Completed'
-    },{
-      id: '12312312',
-      value: '12312312',
-      status : 'Completed'
-    },{
-      id: '2343wefwe',
-      value: '234234',
-      status : 'Completed'
-    }];
+  addAllTodos(i: number) {
+    // this.allTodos.push(this.fb.control(this.todoItems[i]));
+    
+    this.allTodos.push(this.fb.control(this.todoItems[i]));
+    
+    this.taskName.reset();
+
+    this.writeUserData();
+  }
+
+  writeUserData() {
+    console.log('all',  this.allTodos);
+    const value = this.allTodos.value;
+    console.log('values',  this.allTodos.value)
     const completeHandler = (a: Error) => {
       if (a != null && a != undefined) {
         console.log('Failed to add new item', a);
@@ -122,27 +124,17 @@ export class InputtaskComponent implements OnInit {
     firebase.database().ref('todos/all').set(value, completeHandler);
   }
 
-  addAllTodos(i: number) {
-    console.log(this.taskName.value);
-    // this.allTodos.push(this.fb.control(this.todoItems[i]));
-
-    this.allTodos.push(this.fb.control(this.todoItems));
-        
-    this.taskName.reset();
-  }
-
-  database: any;
+   database: any;
 
   constructor(private fb: FormBuilder) {
   }
 
   onDelete(i: number){
-    console.log('deletion of',i);
+    
     this.allTodos.removeAt(i);
   }
 
   onCheck(id){
-      console.log('id',id);
 
      var filteredItems =  this.todoItems.filter((todoItem)=> {
           return  todoItem.id == id;
@@ -166,8 +158,7 @@ export class InputtaskComponent implements OnInit {
     return this.taskForm.get('taskName') as FormControl;
   }
 
-
-  setShowFilter(value) { 
+  setShowFilter(value: any) { 
     this.showState = value;
  }
 }
