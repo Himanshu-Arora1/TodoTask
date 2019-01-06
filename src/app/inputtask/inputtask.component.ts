@@ -15,7 +15,6 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 import { MAT_CHECKBOX_CLICK_ACTION } from '@angular/material/checkbox';
 import { ThrowStmt } from '@angular/compiler';
 
-
 @Component({ //decorator
   selector: 'app-inputtask',
   templateUrl: './inputtask.component.html',
@@ -55,11 +54,22 @@ export class InputtaskComponent implements OnInit {
      this.database = firebase.database();
 
     var serverTask = this.database.ref('todos/all');
+
     serverTask.on('value', function (snapshot) {
        this.todoItems = snapshot.val() || [];
-       //this.allTodos.push(this.fb.control(this.todoItems));
-       console.log('snap', this.allTodos);
+      console.log('abc', this.allTodos);
+
+       if(this.allTodos.value.length == []){
+          this.todoItems.forEach(item => {
+              this.allTodos.push(this.fb.control(item));
+       }) }else{
+            console.log('issus is with alltodos')
+       }
+      
+       
+       console.log('snap', this.allTodos.controls);
     }.bind(this));
+    
     
     // Form control Declaration
     this.taskForm = this.fb.group({
@@ -80,9 +90,7 @@ export class InputtaskComponent implements OnInit {
   }
 
   ngAfterViewInit() {
-    
-    
-    
+
     const self = this;
         
     fromEvent(this.addTodoInput.nativeElement, 'keyup').pipe(
@@ -135,18 +143,23 @@ export class InputtaskComponent implements OnInit {
   }
 
   onCheck(id){
-
      var filteredItems =  this.todoItems.filter((todoItem)=> {
           return  todoItem.id == id;
       })
 
       filteredItems.forEach((filteredItem)=>{
 
-        if(filteredItem.status=='COMPLETED'){
-          filteredItem.status='ACTIVE';
+        if(filteredItem.status=='ACTIVE'){
+          filteredItem.status='COMPLETED'
         }else{
-          filteredItem.status='COMPLETED';
-        }    
+          filteredItem.status='ACTIVE'
+        }
+
+        // if(filteredItem.status=='COMPLETED'){
+        //   filteredItem.status='ACTIVE';
+        // }else{
+        //   filteredItem.status='COMPLETED';
+        // }    
       })
   }
 
